@@ -112,20 +112,27 @@ namespace FloodControl
 
                 case GameStates.Playing:
                     timeSinceLastInput += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-                    if (timeSinceLastInput >= MinTimeSinceLastInput)
+                    if (gameBoard.ArePiecesAnimating())
                     {
-                        HandleMouseInput(Mouse.GetState());
+                        gameBoard.UpdateAnimatedPieces();
                     }
-
-                    gameBoard.ResetWater();
-
-                    for (int y = 0; y < GameBoard.GameBoardHeight; y++)
+                    else
                     {
-                        CheckScoringChain(gameBoard.GetWaterChain(y));
-                    }
-                    gameBoard.GenerateNewPieces(true);
+                        gameBoard.ResetWater();
 
+                        for (int y = 0; y < GameBoard.GameBoardHeight; y++)
+                        {
+                            CheckScoringChain(gameBoard.GetWaterChain(y));
+                        }
+
+                        gameBoard.GenerateNewPieces(true);
+
+                        if (timeSinceLastInput >= MinTimeSinceLastInput)
+                        {
+                            HandleMouseInput(Mouse.GetState());
+                        }
+                        
+                    }
                     break;
             }
 
@@ -157,8 +164,32 @@ namespace FloodControl
                         int pixelX = (int)gameBoardDisplayOrigin.X + (x * GamePiece.PieceWidth);
                         int pixelY = (int)gameBoardDisplayOrigin.Y + (y * GamePiece.PieceHeight);
 
-                        spriteBatch.Draw(playingPieces, new Rectangle(pixelX, pixelY, GamePiece.PieceWidth, GamePiece.PieceHeight), EmptyPiece, Color.White);
-                        spriteBatch.Draw(playingPieces, new Rectangle(pixelX, pixelY, GamePiece.PieceWidth, GamePiece.PieceHeight), gameBoard.GetSourceRect(x, y), Color.White);
+                        DrawEmptyPiece(pixelX, pixelY);
+                        bool pieceDrawn = false;
+                        string positionName = x.ToString() + "_" + y.ToString();
+
+                        if (gameBoard.RotatingPieces.ContainsKey(positionName))
+                        {
+                            DrawRotatingPiece(pixelX, pixelY, positionName);
+                            pieceDrawn = true;
+                        }
+
+                        if (gameBoard.FadingPieces.ContainsKey(positionName))
+                        {
+                            DrawFadingPiece(pixelX, pixelY, positionName);
+                            pieceDrawn = true;
+                        }
+
+                        if (gameBoard.FallingPieces.ContainsKey(positionName))
+                        {
+                            DrawFallingPiece(pixelX, pixelY, positionName);
+                            pieceDrawn = true;
+                        }
+
+                        if (!pieceDrawn)
+                        {
+                            DrawStandardPiece(x, y, pixelX, pixelY);
+                        }
 
                     }
                 this.Window.Title = playerScore.ToString();
@@ -189,6 +220,7 @@ namespace FloodControl
 
                         foreach(Vector2 ScoringSquare in WaterChain)
                         {
+                            gameBoard.AddFadingPiece((int)ScoringSquare.X, (int)ScoringSquare.Y, gameBoard.GetSquare((int)ScoringSquare.X, (int)ScoringSquare.Y));
                             gameBoard.SetSquare((int)ScoringSquare.X, (int)ScoringSquare.Y, "Empty");
                         }
                     }
@@ -205,6 +237,7 @@ namespace FloodControl
             {
                 if (mouseState.LeftButton == ButtonState.Pressed)
                 {
+                    gameBoard.AddRotatingPiece(x, y, gameBoard.GetSquare(x, y), false);
                     gameBoard.RotatePiece(x, y, false);
                     timeSinceLastInput = 0.0f;
                 }
@@ -212,10 +245,42 @@ namespace FloodControl
 
             if (mouseState.RightButton == ButtonState.Pressed)
             {
+                gameBoard.AddRotatingPiece(x, y, gameBoard.GetSquare(x, y), true);
                 gameBoard.RotatePiece(x, y, true);
                 timeSinceLastInput = 0.0f;
             }
         }
+
+        void DrawEmptyPiece(int pixelX, int pixelY)
+        {
+            spriteBatch.Draw(playingPieces, new Rectangle(pixelX, pixelY, GamePiece.PieceWidth, GamePiece.PieceHeight), EmptyPiece, Color.White);
+        }
+
+        void DrawStandardPiece(int x, int y, int pixelX, int pixelY)
+        {
+            spriteBatch.Draw(playingPieces, new Rectangle(pixelX, pixelY, GamePiece.PieceWidth, GamePiece.PieceHeight), gameBoard.GetSourceRect(x, y), Color.White);
+        }
+
+        void DrawFallingPiece(int pixelX, int pixelY, string positionName)
+        {
+            spriteBatch.Draw(playingPieces, new Rectangle(pixelX, pixelY - gameBoard.FallingPieces[positionName].VerticalOffset, GamePiece.PieceWidth, GamePiece.PieceHeight),
+                                                         gameBoard.FallingPieces[positionName].GetSourceRect(), Color.White);
+        }
+
+        void DrawFadingPiece(int pixelX, int pixelY, string positionName)
+        {
+            spriteBatch.Draw(playingPieces, new Rectangle(pixelX, pixelY, GamePiece.PieceWidth, GamePiece.PieceHeight),
+                                                          gameBoard.FadingPieces[positionName].GetSourceRect(), Color.White * gameBoard.FadingPieces[positionName].AlphaLevel);
+        }
+
+        void DrawRotatingPiece(int pixelX, int pixelY, string positionName)
+        {
+            spriteBatch.Draw(playingPieces, new Rectangle(pixelX + (GamePiece.PieceWidth) / 2, pixelY + (GamePiece.PieceHeight / 2), GamePiece.PieceWidth, GamePiece.PieceHeight),
+                                                         gameBoard.RotatingPieces[positionName].GetSourceRect(), Color.White, gameBoard.RotatingPieces[positionName].RotationAmount,
+                                                         new Vector2(GamePiece.PieceWidth / 2, GamePiece.PieceHeight / 2), SpriteEffects.None, 0.0f);
+
+        }
+
 
     }
 }

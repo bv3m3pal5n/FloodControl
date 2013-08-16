@@ -10,6 +10,11 @@ namespace FloodControl
 {
     class GameBoard
     {
+        public Dictionary<string, FallingPiece> FallingPieces = new Dictionary<string, FallingPiece>();
+        public Dictionary<string, RotatingPiece> RotatingPieces = new Dictionary<string, RotatingPiece>();
+        public Dictionary<string, FadingPiece> FadingPieces = new Dictionary<string, FadingPiece>();
+
+
         Random rand = new Random();
 
         public const int GameBoardWidth = 8;
@@ -70,6 +75,7 @@ namespace FloodControl
                 {
                     SetSquare(x, y, GetSquare(x, rowLookup));
                     SetSquare(x, rowLookup, "Empty");
+                    AddFallingPiece(x, y, GetSquare(x, y), GamePiece.PieceHeight * (y - rowLookup));
                     rowLookup = -1;
                 }
                 rowLookup--;
@@ -98,7 +104,11 @@ namespace FloodControl
                 for (int x = 0; x < GameBoard.GameBoardWidth; x++)
                 {
                     if (GetSquare(x, y) == "Empty")
+                    {
                         RandomPiece(x, y);
+                        AddFallingPiece(x, y, GetSquare(x, y), GamePiece.PieceHeight * GameBoardHeight);
+                    }
+
                 }
         }
 
@@ -139,6 +149,83 @@ namespace FloodControl
             WaterTracker.Clear();
             PropagateWater(0, y, "Left");
             return WaterTracker;
+        }
+
+        public void AddFallingPiece(int x, int y, string pieceName, int verticalOffset)
+        {
+            FallingPieces[x.ToString() + "_" + y.ToString()] = new FallingPiece(pieceName, verticalOffset);
+        }
+
+        public void AddRotatingPiece(int x, int y, string pieceName, bool clockwise)
+        {
+            RotatingPieces[x.ToString() + "_" + y.ToString()] = new RotatingPiece(pieceName, clockwise);
+        }
+
+        public void AddFadingPiece(int x, int y,string pieceName)
+        {
+            FadingPieces[x.ToString() + "_" + y.ToString()] = new FadingPiece(pieceName, "W");
+        }
+
+        public bool ArePiecesAnimating()
+        {
+            if ((FallingPieces.Count == 0) && (RotatingPieces.Count == 0) && (FadingPieces.Count == 0))
+                return false;
+            else return true;
+        }
+
+        void updateFadingPieces()
+        {
+            Queue<string> RemoveKeys = new Queue<string>();
+
+            foreach (string thisKey in FadingPieces.Keys)
+            {
+                FadingPieces[thisKey].UpdatePiece();
+
+                if (FadingPieces[thisKey].AlphaLevel == 0.0f)
+                    RemoveKeys.Enqueue(thisKey.ToString());
+            }
+            while (RemoveKeys.Count > 0)
+                FadingPieces.Remove(RemoveKeys.Dequeue());
+        }
+
+        void updateFallingPieces()
+        {
+            Queue<string> RemoveKeys = new Queue<string>();
+
+            foreach (string thisKey in FallingPieces.Keys)
+            {
+                FallingPieces[thisKey].UpdatePiece();
+
+                if (FallingPieces[thisKey].VerticalOffset == 0)
+                    RemoveKeys.Enqueue(thisKey.ToString());
+            }
+            while (RemoveKeys.Count > 0)
+                FallingPieces.Remove(RemoveKeys.Dequeue());
+        }
+
+        void updateRotatingPieces()
+        {
+            Queue<string> RemoveKeys = new Queue<string>();
+
+            foreach (string thisKey in RotatingPieces.Keys)
+            {
+                RotatingPieces[thisKey].UpdatePiece();
+
+                if (RotatingPieces[thisKey].rotationTicksRemaining == 0)
+                    RemoveKeys.Enqueue(thisKey.ToString());
+            }
+            while (RemoveKeys.Count > 0)
+                RotatingPieces.Remove(RemoveKeys.Dequeue());
+        }
+
+        public void UpdateAnimatedPieces()
+        {
+            if (FadingPieces.Count == 0)
+            {
+                updateFallingPieces();
+                updateRotatingPieces();
+            }
+            else updateFadingPieces();
         }
 
 
