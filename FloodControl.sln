@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FloodControl", "FloodControl\FloodControl\FloodControl.csproj", "{1AAF7D1C-593E-4430-BF1E-DFB8BE6074DE}"
+EndProject
+Project("{96E2B04D-8817-42C6-938A-82C39BA4D311}") = "FloodControlContent", "FloodControl\FloodControlContent\FloodControlContent.contentproj", "{DF8CB8AA-5219-4484-8833-6F8FAE14143A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1AAF7D1C-593E-4430-BF1E-DFB8BE6074DE}.Debug|x86.ActiveCfg = Debug|x86
+		{1AAF7D1C-593E-4430-BF1E-DFB8BE6074DE}.Debug|x86.Build.0 = Debug|x86
+		{1AAF7D1C-593E-4430-BF1E-DFB8BE6074DE}.Release|x86.ActiveCfg = Release|x86
+		{1AAF7D1C-593E-4430-BF1E-DFB8BE6074DE}.Release|x86.Build.0 = Release|x86
+		{DF8CB8AA-5219-4484-8833-6F8FAE14143A}.Debug|x86.ActiveCfg = Debug|x86
+		{DF8CB8AA-5219-4484-8833-6F8FAE14143A}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
