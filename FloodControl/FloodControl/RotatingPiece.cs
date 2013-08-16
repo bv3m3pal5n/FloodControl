@@ -10,7 +10,7 @@ namespace FloodControl
     {
         bool clockwise;
 
-        public static float rotationRate = (MathHelper.PiOver2 / 10);
+        public static float rotationRate = (MathHelper.PiOver2 / 1.5f);
         float rotationAmount = 0;
         public int rotationTicksRemaining = 10;
 
