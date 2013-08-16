@@ -14,7 +14,7 @@ namespace FloodControl
         float rotationAmount = 0;
         public int rotationTicksRemaining = 10;
 
-        public float RotationAmount { get { if (clockwise)return rotationAmount; else return (MathHelper.PiOver2) - rotationAmount; } }
+        public float RotationAmount { get { if (clockwise)return rotationAmount; else return  - rotationAmount; } }
 
         public RotatingPiece(string pieceType, bool clockwise)
             : base(pieceType)
